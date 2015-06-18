@@ -34,9 +34,13 @@ tmpnb: minimal-image tmpnb-image
 dev: cleanup proxy tmpnb
 
 cleanup:
-	-docker stop `docker ps -aq`
-	-docker rm   `docker ps -aq`
-	-docker images -q --filter "dangling=true" | xargs docker rmi
+	-docker ps -a | grep "proxy" | awk '{print $$1}' | xargs docker stop
+	-docker ps -a | grep "proxy" | awk '{print $$1}' | xargs docker rm
+	-docker ps -a | grep "tmpnb" | awk '{print $$1}' | xargs docker stop
+	-docker ps -a | grep "tmpnb" | awk '{print $$1}' | xargs docker rm
+	-docker ps -a | grep "jupyterminimal" | awk '{print $$1}' | xargs docker stop
+	-docker ps -a | grep "jupyterminimal" | awk '{print $$1}' | xargs docker rm
+#-docker images -q --filter "dangling=true" | xargs docker rmi
 
 log-tmpnb:
 	docker logs -f tmpnb

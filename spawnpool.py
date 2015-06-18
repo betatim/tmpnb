@@ -86,7 +86,7 @@ class SpawnPool():
         return self.available.pop()
 
     @gen.coroutine
-    def adhoc(self, user):
+    def adhoc(self, user, extra=None):
         '''Launch a container with a fixed path by taking the place of an existing container from
         the pool.'''
 
@@ -94,7 +94,7 @@ class SpawnPool():
         app_log.debug("Discarding container [%s] to create an ad-hoc replacement.", to_release)
         yield self.release(to_release, False)
 
-        launched = yield self._launch_container(user=user, enpool=False)
+        launched = yield self._launch_container(user=user, enpool=False, extra=extra)
         raise gen.Return(launched)
 
     @gen.coroutine
@@ -204,7 +204,7 @@ class SpawnPool():
             self._heart_beating = False
 
     @gen.coroutine
-    def _launch_container(self, user=None, enpool=True):
+    def _launch_container(self, user=None, enpool=True, extra=None):
         '''Launch a new notebook server in a fresh container, register it with the proxy, and
         add it to the pool.'''
 
@@ -224,7 +224,8 @@ class SpawnPool():
                 container_name, path)
         create_result = yield self.spawner.create_notebook_server(base_path=path,
                                                                   container_name=container_name,
-                                                                  container_config=self.container_config)
+                                                                  container_config=self.container_config,
+                                                                  extra=extra)
         container_id, host_ip, host_port = create_result
         app_log.debug("Created notebook server [%s] for path [%s] at [%s:%s]", container_name, path, host_ip, host_port)
 

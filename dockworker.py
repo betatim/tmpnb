@@ -62,7 +62,7 @@ class DockerSpawner():
         self.docker_client = async_docker_client
 
     @gen.coroutine
-    def create_notebook_server(self, base_path, container_name, container_config):
+    def create_notebook_server(self, base_path, container_name, container_config, extra):
         '''Creates a notebook_server running off of `base_path`.
 
         Returns the (container_id, ip, port) tuple in a Future.'''
@@ -88,6 +88,14 @@ class DockerSpawner():
             "-c",
             rendered_command
         ]
+        if extra is not None:
+            app_log.info("git clone'ing https://%s", extra)
+            command = [
+                "/bin/sh",
+                "-c",
+                # https://github.com/betatim/essence.git
+                "git clone https://" + extra + " && " + rendered_command
+            ]
 
         resp = yield self._with_retries(self.docker_client.create_container,
                                         image=container_config.image,

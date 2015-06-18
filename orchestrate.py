@@ -69,13 +69,15 @@ class SpawnHandler(RequestHandler):
             else:
                 # Split /user/{some_user}/long/url/path and acquire {some_user}
                 path_parts = path.lstrip('/').split('/', 2)
+                app_log.info("path parts: %s", path_parts)
                 user = path_parts[1]
 
                 # Scrap a container from the pool and replace it with an ad-hoc replacement.
                 # This takes longer, but is necessary to support ad-hoc containers
-                yield self.pool.adhoc(user)
+                yield self.pool.adhoc(user, path_parts[-1])
 
-                url = path
+                url = "/" + "/".join(path_parts[:2])
+                app_log.info("new url: %s", url)
 
             app_log.debug("Redirecting [%s] -> [%s].", self.request.path, url)
             self.redirect(url, permanent=False)
